@@ -1,20 +1,26 @@
 package main
 
 import (
-	"fmt"
 	"gos/gos"
 	"net/http"
 )
 
 func main() {
 	r := gos.New()
-	r.GET("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "URL.Path = %q\n", r.URL.Path)
+	r.GET("/", func(c *gos.Context) {
+		c.HTML(http.StatusOK, "<h1>Hello World</h1>")
 	})
-	r.GET("/register", func(w http.ResponseWriter, r *http.Request) {
-		for k, v := range r.Header {
-			fmt.Fprintf(w, "Header[%q] = %q\n", k, v)
-		}
+	r.POST("/register", func(c *gos.Context) {
+		c.JSON(http.StatusOK, gos.H{"uid": c.PostForm("uid"), "name": c.PostForm("name")})
+	})
+	r.POST("/login", func(c *gos.Context) {
+		c.JSON(http.StatusOK, gos.H{"phone": c.PostForm("phone"), "code": c.PostForm("code")})
+	})
+	r.GET("/userInfo/:uid", func(c *gos.Context) {
+		c.JSON(http.StatusOK, gos.H{"uid": c.Param("uid")})
+	})
+	r.GET("/assets/*filepath", func(c *gos.Context) {
+		c.JSON(http.StatusOK, gos.H{"filepath": c.Param("filepath")})
 	})
 
 	err := r.RUN(":9999")
