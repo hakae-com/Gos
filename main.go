@@ -19,9 +19,22 @@ func FormatAsDate(t time.Time) string {
 }
 
 func main() {
+	defer func() {
+		fmt.Println("defer func")
+	}()
+
 	r := gos.New()
 	//add global middleware
-	r.User(gos.Logger())
+	r.User(gos.Logger(), gos.Recovery())
+
+	r.GET("/", func(c *gos.Context) {
+		c.String(http.StatusOK, "Hello World\n")
+	})
+	// index out of range for testing Recovery()
+	r.GET("/panic", func(c *gos.Context) {
+		names := []string{"gos"}
+		c.String(http.StatusOK, names[100])
+	})
 
 	r.SetFuncMap(template.FuncMap{
 		"FormatAsDate": FormatAsDate,
@@ -32,25 +45,13 @@ func main() {
 	r.GET("/", func(c *gos.Context) {
 		c.HTML(http.StatusOK, "css.tmpl", nil)
 	})
-	stu1 := &student{
-		Name: "小米",
-		Age:  12,
-	}
-	stu2 := &student{
-		Name: "华为",
-		Age:  32,
-	}
+	stu1 := &student{Name: "小米", Age: 12}
+	stu2 := &student{Name: "华为", Age: 32}
 	r.GET("/students", func(c *gos.Context) {
-		c.HTML(http.StatusOK, "arr.tmpl", gos.H{
-			"title":  "gos",
-			"stuArr": [2]*student{stu1, stu2},
-		})
+		c.HTML(http.StatusOK, "arr.tmpl", gos.H{"title": "gos", "stuArr": [2]*student{stu1, stu2}})
 	})
 	r.GET("/date", func(c *gos.Context) {
-		c.HTML(http.StatusOK, "custom_func.tmpl", gos.H{
-			"title": "gee",
-			"now":   time.Date(2019, 8, 17, 0, 0, 0, 0, time.UTC),
-		})
+		c.HTML(http.StatusOK, "custom_func.tmpl", gos.H{"title": "gee", "now": time.Now()})
 	})
 
 	account := r.Group("/account")

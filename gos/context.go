@@ -84,6 +84,14 @@ func (m *Context) Data(code int, data []byte) {
 	m.Writer.Write(data)
 }
 
+func (m *Context) Fail(code int, message string) {
+	m.Status(code)
+	_, err := m.Writer.Write([]byte(message))
+	if err != nil {
+		return
+	}
+}
+
 func (m *Context) HTML(code int, name string, data interface{}) {
 	m.SetHeader("Content-Type", "text/html")
 	m.Status(code)
