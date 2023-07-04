@@ -40,7 +40,7 @@ func (m *Context) Next() {
 }
 
 func (m *Context) Param(key string) string {
-	value, _ := m.Params[key]
+	value := m.Params[key]
 	return value
 }
 
@@ -86,10 +86,7 @@ func (m *Context) Data(code int, data []byte) {
 
 func (m *Context) Fail(code int, message string) {
 	m.Status(code)
-	_, err := m.Writer.Write([]byte(message))
-	if err != nil {
-		return
-	}
+	m.Writer.Write([]byte(message))
 }
 
 func (m *Context) HTML(code int, name string, data interface{}) {
